@@ -1,0 +1,37 @@
+from typing import List
+from bisect import bisect_left
+
+class Solution:
+    def getResults(self, queries: List[List[int]]) -> List[bool]:
+        blocks = [0]
+        ans = []
+
+        for q in queries:
+            if q[0] == 1:
+                x = q[1]
+                i = bisect_left(blocks, x)
+
+                if i == len(blocks) or blocks[i] != x:
+                    blocks.insert(i, x)
+
+            else:
+                x, sz = q[1], q[2]
+
+                i = bisect_left(blocks, x)
+
+                prev = 0
+                ok = False
+
+                for j in range(i):
+                    if blocks[j] - prev >= sz:
+                        ok = True
+                        break
+
+                    prev = blocks[j]
+
+                if x - prev >= sz:
+                    ok = True
+
+                ans.append(ok)
+
+        return ans
