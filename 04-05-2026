@@ -1,0 +1,19 @@
+class Solution:
+    def totalWaviness(self, l, r):
+        def waviness(x):
+            s = str(x)
+            cnt = 0
+
+            for i in range(1, len(s) - 1):
+                if (s[i] > s[i - 1] and s[i] > s[i + 1]) or \
+                   (s[i] < s[i - 1] and s[i] < s[i + 1]):
+                    cnt += 1
+
+            return cnt
+
+        ans = 0
+
+        for num in range(l, r + 1):
+            ans += waviness(num)
+
+        return ans
