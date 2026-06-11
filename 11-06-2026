@@ -1,0 +1,10 @@
+class Solution:
+    def assignEdgeWeights(self, edges):
+        MOD = 10**9 + 7
+
+        n = len(edges) + 1
+
+        if n <= 2:
+            return 1
+
+        return pow(2, n - 2, MOD)
