@@ -1,0 +1,19 @@
+class Solution:
+    def sumAndMultiply(self, s, queries):
+        MOD = 10**9 + 7
+
+        ans = []
+
+        for l, r in queries:
+            x = 0
+            sm = 0
+
+            for i in range(l, r + 1):
+                if s[i] != '0':
+                    d = ord(s[i]) - ord('0')
+                    x = (x * 10 + d) % MOD
+                    sm += d
+
+            ans.append((x * sm) % MOD)
+
+        return ans
