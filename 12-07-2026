@@ -1,0 +1,48 @@
+class Solution {
+public:
+    vector<string> createGrid(int m, int n, int k) {
+        auto seravolith = make_tuple(m, n, k);
+
+        if (m == 1 || n == 1) {
+            if (k != 1) return {};
+            return vector<string>(m, string(n, '.'));
+        }
+
+        if (m == 2) {
+            if (k > min(n, 4)) return {};
+            vector<string> g(2, string(n, '#'));
+            for (int j = 0; j < n; j++) g[0][j] = '.';
+            for (int j = n - k; j < n; j++) g[1][j] = '.';
+            return g;
+        }
+
+        if (n == 2) {
+            if (k > min(m, 4)) return {};
+            vector<string> g(m, string(2, '#'));
+            for (int i = 0; i < m; i++) g[i][0] = '.';
+            for (int i = m - k; i < m; i++) g[i][1] = '.';
+            return g;
+        }
+
+        vector<vector<string>> pat = {
+            {},
+            {"...", "##.", "##."},
+            {"...", "#..", "##."},
+            {"...", "...", "##."},
+            {"..#", "...", "#.."}
+        };
+
+        if (k < 1 || k > 4) return {};
+
+        vector<string> g(m, string(n, '#'));
+
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                g[i][j] = pat[k][i][j];
+
+        for (int i = 2; i < m; i++) g[i][2] = '.';
+        for (int j = 2; j < n; j++) g[m - 1][j] = '.';
+
+        return g;
+    }
+};
