@@ -1,0 +1,90 @@
+from bisect import bisect_left
+
+class Solution:
+    def maxActiveSections(self, s: str, queries: list[list[int]]) -> list[int]:
+        n = len(s)
+        pref = [0] * (n + 1)
+        for i in range(n):
+            pref[i + 1] = pref[i] + (1 if s[i] == '1' else 0)
+            
+        def count_ones(l, r):
+            if l > r: return 0
+            return pref[r + 1] - pref[l]
+
+        blocks = []
+        i = 0
+        while i < n:
+            start = i
+            while i < n and s[i] == s[start]:
+                i += 1
+            blocks.append((s[start], start, i - 1))
+            
+        valid_trades = []
+        for idx in range(1, len(blocks) - 1):
+            if blocks[idx][0] == '1':
+                valid_trades.append({
+                    'one_start': blocks[idx][1],
+                    'one_end': blocks[idx][2],
+                    'l_zero_start': blocks[idx - 1][1],
+                    'r_zero_end': blocks[idx + 1][2]
+                })
+
+        q_by_l = [[] for _ in range(n)]
+        for q_idx, (l, r) in enumerate(queries):
+            q_by_l[l].append((r, q_idx))
+            
+        ans = [0] * len(queries)
+        for l, r in queries:
+            ans[queries.index([l,r])] = count_ones(l, r) 
+            
+        t_starts = [t['one_start'] for t in valid_trades]
+        
+        BIT = [0] * (n + 2)
+        def update(idx, val):
+            idx += 1
+            while idx < len(BIT):
+                BIT[idx] = max(BIT[idx], val)
+                idx += idx & (-idx)
+                
+        def query(idx):
+            idx += 1
+            res = 0
+            while idx > 0:
+                res = max(res, BIT[idx])
+                idx -= idx & (-idx)
+            return res
+
+        trades_by_r = [[] for _ in range(n)]
+        for t in valid_trades:
+            trades_by_r[t['r_zero_end']].append(t)
+            
+        queries_by_r = [[] for _ in range(n)]
+        for q_idx, (l, r) in enumerate(queries):
+            queries_by_r[r].append((l, q_idx))
+            
+        for r in range(n):
+            for t in trades_by_r[r]:
+                gain = (t['r_zero_end'] - t['l_zero_start'] + 1) - (t['one_end'] - t['one_start'] + 1)
+                update(n - 1 - t['l_zero_start'], gain)
+                
+            for l, q_idx in queries_by_r[r]:
+                base = count_ones(l, r)
+                max_total = base
+                
+                idx_start = bisect_left(t_starts, l)
+                while idx_start < len(valid_trades):
+                    t = valid_trades[idx_start]
+                    if t['one_end'] > r:
+                        break
+                    
+                    L = max(l, t['l_zero_start'])
+                    R = min(r, t['r_zero_end'])
+                    ones_lost = t['one_end'] - t['one_start'] + 1
+                    current_ones = base - ones_lost + (R - L + 1)
+                    if current_ones > max_total:
+                        max_total = current_ones
+                    idx_start += 1
+                    
+                ans[q_idx] = max_total
+                
+        return ans
