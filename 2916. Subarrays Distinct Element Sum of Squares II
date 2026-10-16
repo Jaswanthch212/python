@@ -1,0 +1,47 @@
+class Solution:
+    def sumCounts(self, nums: List[int]) -> int:
+        MOD = 10**9 + 7
+        n = len(nums)
+        
+        last = {}
+        bit_cnt = [0] * (n + 1)
+        bit_sum = [0] * (n + 1)
+        
+        ans = 0
+        cur_sq = 0
+        cur_sum = 0
+        c1 = 0
+        
+        for j, x in enumerate(nums, 1):
+            p = last.get(x, 0)
+            last[x] = j
+            
+            if p == 0:
+                cur_sq = (cur_sq + 2 * cur_sum + j) % MOD
+                cur_sum += j
+                c1 += 1
+            else:
+                cnt = 0
+                sum_m = 0
+                idx = p - 1
+                while idx > 0:
+                    cnt += bit_cnt[idx]
+                    sum_m += bit_sum[idx]
+                    idx -= idx & -idx
+                
+                prefix_d = p * c1 - p * (p - 1) // 2 + p * cnt - sum_m
+                sub_sum = cur_sum - prefix_d
+                
+                length = j - p
+                cur_sq = (cur_sq + 2 * sub_sum + length) % MOD
+                cur_sum += length
+                
+                idx = p
+                while idx <= n:
+                    bit_cnt[idx] += 1
+                    bit_sum[idx] += p
+                    idx += idx & -idx
+            
+            ans = (ans + cur_sq) % MOD
+            
+        return ans
